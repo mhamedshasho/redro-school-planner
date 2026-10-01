@@ -10,9 +10,13 @@
 - حفظ تلقائي في المتصفح.
 - طباعة وحفظ PDF من نافذة الطباعة.
 - تصدير PNG.
-- قسم مشاريع Redro.
-- رابط Aleppo Center Cash.
-- جاهز للنشر على GitHub Pages.
+- واجهة متجاوبة للهاتف والكمبيوتر.
+- تطبيق Android بصيغة APK.
+
+## تحميل التطبيق
+[تحميل أحدث إصدار Android APK](https://github.com/mhamedshasho/redro-school-planner/releases/latest/download/redro-school-planner.apk)
+
+[عرض جميع الإصدارات](https://github.com/mhamedshasho/redro-school-planner/releases)
 
 ## GitHub Pages
 المشروع static HTML/CSS/JS ولا يحتاج خادم.
