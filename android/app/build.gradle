@@ -2,5 +2,5 @@ plugins { id "com.android.application" }
 android {
  namespace "com.redro.schoolplanner"
  compileSdk 35
- defaultConfig { applicationId "com.redro.schoolplanner"; minSdk 23; targetSdk 35; versionCode 1; versionName "1.0.0" }
+ defaultConfig { applicationId "com.redro.schoolplanner"; minSdk 23; targetSdk 35; versionCode 2; versionName "1.1.0" }
 }
