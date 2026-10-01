@@ -1,9 +1,12 @@
-const key="redro-school-planner-v2";
+const key="redro-school-planner-v3";
 const defaultDays=["السبت","الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"];
-let state=JSON.parse(localStorage.getItem(key)||"null")||{rows:6,cols:7,name:"",title:"البرنامج الأسبوعي",accent:"#ef4444",orientation:"horizontal",days:defaultDays,data:[]};
-state.days??=defaultDays.slice();
+const fallback={rows:6,cols:7,name:"",title:"البرنامج الأسبوعي",accent:"#ef4444",orientation:"horizontal",days:defaultDays.slice(),data:[]};
+let state=JSON.parse(localStorage.getItem(key)||"null")||JSON.parse(localStorage.getItem("redro-school-planner-v2")||"null")||fallback;
+state.rows=Math.max(1,Number(state.rows)||6); state.cols=Math.max(1,Number(state.cols)||7);
+state.days=Array.isArray(state.days)?state.days:defaultDays.slice();
+state.data=Array.isArray(state.data)?state.data:[];
 const $=id=>document.getElementById(id);
-function save(){localStorage.setItem(key,JSON.stringify(state));$("status").textContent="تم الحفظ";clearTimeout(window.saveTimer);window.saveTimer=setTimeout(()=>$("status").textContent="",900)}
+function save(){localStorage.setItem(key,JSON.stringify(state));const s=$("status");if(s){s.textContent="تم الحفظ";clearTimeout(window.saveTimer);window.saveTimer=setTimeout(()=>s.textContent="",900)}}
 function val(r,c){return state.data[r]?.[c]||""}
 function setVal(r,c,v){state.data[r]??=[];state.data[r][c]=v}
 function input(value,handler,cls=""){const i=document.createElement("input");i.value=value;i.className=cls;i.addEventListener("input",handler);return i}
@@ -23,10 +26,43 @@ function render(){
 }
 function resizeRows(n){if(n<1)return;state.rows=n;state.data.length=n;for(let r=0;r<n;r++)state.data[r]??=[];render();save()}
 function resizeCols(n){if(n<1)return;state.cols=n;for(const r of state.data)if(r)r.length=n;state.days.length=n;for(let c=0;c<n;c++)state.days[c]??=("اليوم "+(c+1));render();save()}
+function textFit(ctx,text,x,y,maxWidth,lineHeight,maxLines=2){
+ const words=String(text||"").split(/\\s+/);let lines=[],line="";
+ for(const w of words){const test=line?line+" "+w:w;if(ctx.measureText(test).width<=maxWidth)line=test;else{if(line)lines.push(line);line=w;if(lines.length===maxLines-1)break}}
+ if(line&&lines.length<maxLines)lines.push(line);
+ ctx.textAlign="center";ctx.textBaseline="middle";lines.slice(0,maxLines).forEach((l,i)=>ctx.fillText(l,x,y+(i-(lines.length-1)/2)*lineHeight));
+}
+function drawCell(ctx,x,y,w,h,text,header=false){
+ ctx.fillStyle=header?"#111827":"#ffffff";ctx.fillRect(x,y,w,h);
+ ctx.strokeStyle="#cbd5e1";ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+ ctx.fillStyle=header?"#ffffff":"#111827";ctx.font=header?"700 18px Tahoma, Arial, sans-serif":"16px Tahoma, Arial, sans-serif";
+ ctx.direction="rtl";textFit(ctx,text,x+w/2,y+h/2,w-18,20,2);
+}
+async function exportPNG(){
+ const cols=state.orientation==="horizontal"?state.cols+1:state.rows+1;
+ const rows=state.orientation==="horizontal"?state.rows+1:state.cols+1;
+ const cw=150,ch=64,pad=24,titleH=86,nameH=30;
+ const canvas=document.createElement("canvas");canvas.width=pad*2+cols*cw;canvas.height=pad*2+titleH+nameH+rows*ch;
+ const ctx=canvas.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.fillStyle="#111827";ctx.textAlign="center";ctx.direction="rtl";ctx.font="800 28px Tahoma, Arial, sans-serif";ctx.fillText(state.title||"البرنامج الأسبوعي",canvas.width/2,pad+32);
+ ctx.font="16px Tahoma, Arial, sans-serif";ctx.fillText(state.name?("الطالب: "+state.name):"",canvas.width/2,pad+62);
+ const ox=pad,oy=pad+titleH;
+ if(state.orientation==="horizontal"){
+  drawCell(ctx,ox,oy,cw,ch,"الحصة",true);
+  for(let c=0;c<state.cols;c++)drawCell(ctx,ox+(c+1)*cw,oy,cw,ch,state.days[c]||("اليوم "+(c+1)),true);
+  for(let r=0;r<state.rows;r++){drawCell(ctx,ox,oy+(r+1)*ch,cw,ch,"الحصة "+(r+1),true);for(let c=0;c<state.cols;c++)drawCell(ctx,ox+(c+1)*cw,oy+(r+1)*ch,cw,ch,val(r,c),false)}
+ }else{
+  drawCell(ctx,ox,oy,cw,ch,"اليوم",true);
+  for(let r=0;r<state.rows;r++)drawCell(ctx,ox+(r+1)*cw,oy,cw,ch,"الحصة "+(r+1),true);
+  for(let c=0;c<state.cols;c++){drawCell(ctx,ox,oy+(c+1)*ch,cw,ch,state.days[c]||("اليوم "+(c+1)),true);for(let r=0;r<state.rows;r++)drawCell(ctx,ox+(r+1)*cw,oy+(c+1)*ch,cw,ch,val(r,c),false)}
+ }
+ const data=canvas.toDataURL("image/png");
+ if(window.Android&&Android.savePng)Android.savePng(data,"redro-school-planner.png");else{const a=document.createElement("a");a.download="redro-school-planner.png";a.href=data;a.click()}
+}
 $("addRow").onclick=()=>resizeRows(state.rows+1);$("delRow").onclick=()=>resizeRows(state.rows-1);$("addCol").onclick=()=>resizeCols(state.cols+1);$("delCol").onclick=()=>resizeCols(state.cols-1);
 $("studentName").oninput=e=>{state.name=e.target.value;save()};$("title").oninput=e=>{state.title=e.target.value;save()};$("accent").oninput=e=>{state.accent=e.target.value;render();save()};
 $("horizontal").onclick=()=>{state.orientation="horizontal";render();save()};$("vertical").onclick=()=>{state.orientation="vertical";render();save()};
-$("reset").onclick=()=>{if(confirm("إعادة البرنامج للوضع الافتراضي؟")){localStorage.removeItem(key);location.reload()}};
-$("printBtn").onclick=()=>window.print();
-$("pngBtn").onclick=async()=>{const canvas=await html2canvas($("scheduleWrap"),{scale:2,backgroundColor:"#fff"});const a=document.createElement("a");a.download="redro-school-planner.png";a.href=canvas.toDataURL("image/png");a.click()};
+$("reset").onclick=()=>{if(confirm("إعادة البرنامج للوضع الافتراضي؟")){localStorage.removeItem(key);localStorage.removeItem("redro-school-planner-v2");location.reload()}};
+$("printBtn").onclick=()=>{if(window.Android&&Android.printPage)Android.printPage();else window.print()};
+$("pngBtn").onclick=()=>{try{exportPNG()}catch(e){alert("تعذر إنشاء PNG. حاول مرة أخرى.")}};
 render();
