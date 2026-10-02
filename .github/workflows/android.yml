@@ -29,6 +29,7 @@ jobs:
           mkdir -p android/app/src/main/res/mipmap-xxhdpi
           mkdir -p android/app/src/main/res/mipmap-xxxhdpi
           mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+          mkdir -p android/app/src/main/res/drawable
           convert "$ICON_SOURCE" -auto-orient -resize "1024x1024^" -gravity center -extent 1024x1024 -strip /tmp/redro-icon.png
           convert /tmp/redro-icon.png -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher.png
           convert /tmp/redro-icon.png -resize 72x72 android/app/src/main/res/mipmap-hdpi/ic_launcher.png
