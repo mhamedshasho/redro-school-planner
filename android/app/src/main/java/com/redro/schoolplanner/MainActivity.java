@@ -31,7 +31,8 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(true);
         web.setWebViewClient(new WebViewClient());
         web.addJavascriptInterface(new Bridge(), "Android");
-        web.loadUrl("file:///android_asset/index.html");
+        web.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+        web.loadUrl("https://mhamedshasho.github.io/redro-school-planner/");
         setContentView(web);
     }
 
