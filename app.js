@@ -17,11 +17,11 @@ function render(){
  if(state.orientation==="horizontal"){
   const tr=document.createElement("tr"),corner=document.createElement("th");corner.append(input("الحصة",()=>{}));tr.append(corner);
   for(let c=0;c<state.cols;c++){const th=document.createElement("th");th.append(input(state.days[c]||("اليوم "+(c+1)),e=>{state.days[c]=e.target.value;save()}));tr.append(th)}t.append(tr);
-  for(let r=0;r<state.rows;r++){const row=document.createElement("tr"),th=document.createElement("th");th.append(input("الحصة "+(r+1),()=>{}));row.append(th);for(let c=0;c<state.cols;c++){const td=document.createElement("td");td.append(input(val(r,c),e=>{setVal(r,c,e.target.value);save()}));row.append(td)}t.append(row)}
+  for(let r=0;r<state.rows;r++){const row=document.createElement("tr"),th=document.createElement("th");th.append(input("الحصة "+(r+1),()=>{}));row.append(th);for(let c=0;c<state.cols;c++){const td=document.createElement("td");td.style.backgroundColor=state.accent;td.append(input(val(r,c),e=>{setVal(r,c,e.target.value);save()}));row.append(td)}t.append(row)}
  }else{
   const tr=document.createElement("tr"),corner=document.createElement("th");corner.append(input("اليوم",()=>{}));tr.append(corner);
   for(let r=0;r<state.rows;r++){const th=document.createElement("th");th.append(input("الحصة "+(r+1),()=>{}));tr.append(th)}t.append(tr);
-  for(let c=0;c<state.cols;c++){const row=document.createElement("tr"),th=document.createElement("th");th.append(input(state.days[c]||("اليوم "+(c+1)),e=>{state.days[c]=e.target.value;save()}));row.append(th);for(let r=0;r<state.rows;r++){const td=document.createElement("td");td.append(input(val(r,c),e=>{setVal(r,c,e.target.value);save()}));row.append(td)}t.append(row)}
+  for(let c=0;c<state.cols;c++){const row=document.createElement("tr"),th=document.createElement("th");th.append(input(state.days[c]||("اليوم "+(c+1)),e=>{state.days[c]=e.target.value;save()}));row.append(th);for(let r=0;r<state.rows;r++){const td=document.createElement("td");td.style.backgroundColor=state.accent;td.append(input(val(r,c),e=>{setVal(r,c,e.target.value);save()}));row.append(td)}t.append(row)}
  }
 }
 function resizeRows(n){if(n<1)return;state.rows=n;state.data.length=n;for(let r=0;r<n;r++)state.data[r]??=[];render();save()}
@@ -60,7 +60,7 @@ async function exportPNG(){
  if(window.Android&&Android.savePng)Android.savePng(data,"redro-school-planner.png");else{const a=document.createElement("a");a.download="redro-school-planner.png";a.href=data;a.click()}
 }
 $("addRow").onclick=()=>resizeRows(state.rows+1);$("delRow").onclick=()=>resizeRows(state.rows-1);$("addCol").onclick=()=>resizeCols(state.cols+1);$("delCol").onclick=()=>resizeCols(state.cols-1);
-$("studentName").oninput=e=>{state.name=e.target.value;save()};$("title").oninput=e=>{state.title=e.target.value;save()};$("accent").oninput=e=>{state.accent=e.target.value;render();save()};
+$("studentName").oninput=e=>{state.name=e.target.value;save()};$("title").oninput=e=>{state.title=e.target.value;save()};const updateColor=()=>{state.accent=$("accent").value;render();save()};$("accent").oninput=updateColor;$("accent").onchange=updateColor;
 $("horizontal").onclick=()=>{state.orientation="horizontal";render();save()};$("vertical").onclick=()=>{state.orientation="vertical";render();save()};
 $("reset").onclick=()=>{if(confirm("إعادة البرنامج للوضع الافتراضي؟")){localStorage.removeItem(key);localStorage.removeItem("redro-school-planner-v2");location.reload()}};
 $("printBtn").onclick=()=>{if(window.Android&&Android.printPage)Android.printPage();else window.print()};
