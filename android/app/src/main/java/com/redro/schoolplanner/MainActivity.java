@@ -13,7 +13,7 @@ import android.print.PrintManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.webkit.WebViewClient;\nimport android.content.pm.ActivityInfo;
 import android.util.Base64;
 import java.io.OutputStream;
 
@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
 
     private class Bridge {
         @JavascriptInterface
-        public void printPage() {
+        public void enterPreview() { runOnUiThread(() -> setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)); }\n        @JavascriptInterface\n        public void exitPreview() { runOnUiThread(() -> setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)); }\n        @JavascriptInterface\n        public void printPage() {
             runOnUiThread(() -> {
                 PrintManager pm = (PrintManager)getSystemService(PRINT_SERVICE);
                 if (pm != null) {
