@@ -29,12 +29,12 @@ jobs:
           mkdir -p android/app/src/main/res/mipmap-xxhdpi
           mkdir -p android/app/src/main/res/mipmap-xxxhdpi
           mkdir -p android/app/src/main/res/mipmap-anydpi-v26
-          magick "$ICON_SOURCE" -auto-orient -resize "1024x1024^" -gravity center -extent 1024x1024 -strip /tmp/redro-icon.png
-          magick /tmp/redro-icon.png -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher.png
-          magick /tmp/redro-icon.png -resize 72x72 android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          magick /tmp/redro-icon.png -resize 96x96 android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-          magick /tmp/redro-icon.png -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-          magick /tmp/redro-icon.png -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          convert "$ICON_SOURCE" -auto-orient -resize "1024x1024^" -gravity center -extent 1024x1024 -strip /tmp/redro-icon.png
+          convert /tmp/redro-icon.png -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          convert /tmp/redro-icon.png -resize 72x72 android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          convert /tmp/redro-icon.png -resize 96x96 android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          convert /tmp/redro-icon.png -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          convert /tmp/redro-icon.png -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           cp /tmp/redro-icon.png android/app/src/main/res/drawable/ic_launcher_foreground.png
           cat > android/app/src/main/res/values/colors.xml <<'EOF'
           <resources><color name="icon_background">#111827</color></resources>
