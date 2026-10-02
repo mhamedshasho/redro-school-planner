@@ -2,7 +2,7 @@ plugins { id "com.android.application" }
 android {
  namespace "com.redro.schoolplanner"
  compileSdk 35
- defaultConfig { applicationId "com.redro.schoolplanner"; minSdk 23; targetSdk 35; versionCode 4; versionName "1.1.2" }
+ defaultConfig { applicationId "com.redro.schoolplanner"; minSdk 23; targetSdk 35; versionCode 5; versionName "1.1.3" }
  signingConfigs {
    release {
      storeFile file("${rootProject.projectDir}/release.keystore")
