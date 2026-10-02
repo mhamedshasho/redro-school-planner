@@ -1,34 +1,87 @@
-name: Build Android APK
+name: Build Android Release
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: redro-school-planner-android-release
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare app icon from repository image
+        shell: bash
+        run: |
+          set -e
+          ICON_SOURCE="Gemini_Generated_Image_7y5xf97y5xf97y5x.jpg"
+          test -f "$ICON_SOURCE"
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+          magick "$ICON_SOURCE" -auto-orient -resize "1024x1024^" -gravity center -extent 1024x1024 -strip /tmp/redro-icon.png
+          magick /tmp/redro-icon.png -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          magick /tmp/redro-icon.png -resize 72x72 android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          magick /tmp/redro-icon.png -resize 96x96 android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          magick /tmp/redro-icon.png -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          magick /tmp/redro-icon.png -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp /tmp/redro-icon.png android/app/src/main/res/drawable/ic_launcher_foreground.png
+          cat > android/app/src/main/res/values/colors.xml <<'EOF'
+          <resources><color name="icon_background">#111827</color></resources>
+          EOF
+          cat > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'EOF'
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/icon_background"/>
+              <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+          </adaptive-icon>
+          EOF
+          cp android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          echo "Prepared Android launcher icon from $ICON_SOURCE"
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
-      - run: gradle -p android assembleDebug --stacktrace
-      - uses: actions/upload-artifact@v4
-        with:
-          name: redro-school-planner-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Prepare release signing key
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 --decode > android/release.keystore
+            echo "ANDROID_KEYSTORE_PASSWORD=$STORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          else
+            keytool -genkeypair -v               -keystore android/release.keystore               -storepass redro-school-planner               -keypass redro-school-planner               -alias redro               -keyalg RSA -keysize 2048 -validity 10000               -dname "CN=Redro School Planner, O=Redro"
+          fi
 
-      - name: Publish APK release
+      - name: Build signed release APK
+        run: gradle -p android assembleRelease --stacktrace
+
+      - name: Prepare release asset
+        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/redro-school-planner.apk
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.1
-          name: Redro School Planner v1.1.1
+          tag_name: v1.1.2
+          name: Redro School Planner v1.1.2
           generate_release_notes: true
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: android/app/build/outputs/apk/release/redro-school-planner.apk
           fail_on_unmatched_files: true
