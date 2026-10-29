@@ -1,35 +1,36 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<title>Redro School Planner</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f6fb"><meta name="description" content="Redro School Planner — مخطط دراسي مصمم للهاتف">
+<title>Redro School Planner</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <div><strong>Redro School Planner</strong><span>صانع البرنامج الأسبوعي</span></div>
-  <div class="top-actions"><button id="printBtn">طباعة / PDF</button><button id="pngBtn">PNG</button></div>
-</header>
-<main>
-<section class="panel controls">
-  <label>اسم الطالب<input id="studentName" placeholder="اكتب اسمك"></label>
-  <div class="control-row">
-    <button id="addRow">+ صف</button><button id="delRow">− صف</button>
-    <button id="addCol">+ عمود</button><button id="delCol">− عمود</button>
-  </div>
-  <div class="control-row">
-    <button id="horizontal">أفقي</button><button id="vertical">عمودي</button>
-    <label class="color">لون الجدول<input type="color" id="accent" value="#ef4444"></label>
-    <button id="reset">إعادة ضبط</button>
-  </div>
+<header class="top"><a class="brand" href="#home"><span class="brand-mark">R</span><span><strong>Redro Planner</strong><small>مخططي المدرسي</small></span></a><div class="top-actions"><button id="previewBtn" class="icon-btn" aria-label="معاينة" title="معاينة">👁️ <span>معاينة</span></button><button id="moreBtn" class="icon-btn" aria-label="الأدوات">☰ <span>الأدوات</span></button></div></header>
+<main id="home">
+<section class="welcome"><div class="welcome-copy"><span class="eyebrow">خطّطها بطريقتك</span><h1>أسبوعك، <span>بترتيبك.</span></h1><p>اضغط على أي خانة لتعديلها، لوّنها أو أضف لها صورة.</p></div><div class="welcome-graphic" aria-hidden="true"><span>✎</span><i>✦</i><b>✓</b></div></section>
+<section class="panel identity"><label class="field-label" for="studentName">اسم الطالب</label><input id="studentName" placeholder="اكتب اسمك هنا" autocomplete="name"><label class="field-label" for="title">عنوان الجدول</label><input id="title" value="البرنامج الأسبوعي" maxlength="70"><div class="save-line"><span class="save-dot"></span><span id="status" role="status">يُحفظ تلقائياً على هذا الجهاز</span></div></section>
+<section class="panel planner-panel"><div class="section-heading"><div><span class="section-kicker">YOUR WEEK</span><h2>الجدول الدراسي</h2></div><button id="reset" class="quiet-btn">إعادة ضبط</button></div><div class="table-tip">↔ اسحب الجدول يميناً ويساراً عند الحاجة</div><div id="scheduleWrap"><table id="schedule" aria-label="الجدول الدراسي"></table></div></section>
+<section class="panel editor" id="editor"><div class="section-heading"><div><span class="section-kicker">CELL STUDIO</span><h2>تخصيص الخانة</h2></div><span class="selected-label" id="selectedLabel">اختر خانة من الجدول</span></div>
+<div class="editor-tabs"><button class="tab active" data-tab="templates">🎨 قوالب المواد</button><button class="tab" data-tab="image">🖼️ صوري</button><button class="tab" data-tab="color">🌈 الألوان</button><button class="tab" data-tab="layout">⚙️ الجدول</button></div>
+<div class="tab-panel active" id="tab-templates"><p class="helper">اختر قالب مادة ليظهر داخل الخانة المحددة. يمكنك تغيير النص واللون لاحقاً.</p><div class="template-grid" id="templateGrid">
+<button class="subject-template science" data-subject="science"><span class="subject-art">🧪</span><strong>علوم</strong><small>SCIENCE</small></button>
+<button class="subject-template math" data-subject="math"><span class="subject-art">📐</span><strong>رياضيات</strong><small>MATH</small></button>
+<button class="subject-template arabic" data-subject="arabic"><span class="subject-art">أ</span><strong>اللغة العربية</strong><small>ARABIC</small></button>
+<button class="subject-template english" data-subject="english"><span class="subject-art">Aa</span><strong>الإنجليزية</strong><small>ENGLISH</small></button>
+<button class="subject-template french" data-subject="french"><span class="subject-art">🗼</span><strong>الفرنسية</strong><small>FRANÇAIS</small></button>
+<button class="subject-template history" data-subject="history"><span class="subject-art">🏛️</span><strong>التاريخ</strong><small>HISTORY</small></button>
+<button class="subject-template geography" data-subject="geography"><span class="subject-art">🌍</span><strong>الجغرافيا</strong><small>GEOGRAPHY</small></button>
+<button class="subject-template religion" data-subject="religion"><span class="subject-art">☪</span><strong>التربية الدينية</strong><small>RELIGION</small></button>
+<button class="subject-template computer" data-subject="computer"><span class="subject-art">💻</span><strong>المعلوماتية</strong><small>COMPUTER</small></button>
+<button class="subject-template sport" data-subject="sport"><span class="subject-art">⚽</span><strong>الرياضة</strong><small>SPORT</small></button>
+<button class="subject-template physics" data-subject="physics"><span class="subject-art">⚛️</span><strong>الفيزياء</strong><small>PHYSICS</small></button>
+<button class="subject-template chemistry" data-subject="chemistry"><span class="subject-art">⚗️</span><strong>الكيمياء</strong><small>CHEMISTRY</small></button>
+</div></div>
+<div class="tab-panel" id="tab-image"><p class="helper">أضف صورة من هاتفك للخانة المحددة، ثم حرّكها أو كبّرها من الأزرار.</p><input type="file" id="imageInput" accept="image/*" hidden><button id="chooseImage" class="wide-action">＋ اختيار صورة من الهاتف</button><div class="image-tools"><button id="moveLeft" aria-label="تحريك لليسار">←</button><button id="moveUp" aria-label="تحريك للأعلى">↑</button><button id="moveDown" aria-label="تحريك للأسفل">↓</button><button id="moveRight" aria-label="تحريك لليمين">→</button><button id="zoomOut" aria-label="تصغير الصورة">−</button><button id="zoomIn" aria-label="تكبير الصورة">＋</button></div><button id="removeImage" class="danger-action">إزالة صورة الخانة</button></div>
+<div class="tab-panel" id="tab-color"><p class="helper">لون الخلفية للخانة المحددة فقط، مو لكل الجدول.</p><div class="swatches" id="swatches"><button data-color="#ffffff" style="--swatch:#ffffff" aria-label="أبيض"></button><button data-color="#fff1cf" style="--swatch:#fff1cf" aria-label="كريمي"></button><button data-color="#dff5e8" style="--swatch:#dff5e8" aria-label="أخضر فاتح"></button><button data-color="#dcecff" style="--swatch:#dcecff" aria-label="أزرق فاتح"></button><button data-color="#f4e1ff" style="--swatch:#f4e1ff" aria-label="بنفسجي فاتح"></button><button data-color="#ffe1e5" style="--swatch:#ffe1e5" aria-label="وردي"></button><button data-color="#ffe9d5" style="--swatch:#ffe9d5" aria-label="برتقالي فاتح"></button><button data-color="#e8e9ee" style="--swatch:#e8e9ee" aria-label="رمادي"></button><label class="custom-color">لون مخصص<input type="color" id="cellColor" value="#dcecff"></label></div><button id="clearCellStyle" class="quiet-btn">إزالة لون وقالب الخانة</button></div>
+<div class="tab-panel" id="tab-layout"><p class="helper">كل الأزرار كبيرة ومناسبة للمس. التغيير يخص هذا الجدول فقط.</p><div class="layout-actions"><button id="addRow">＋ إضافة حصة</button><button id="delRow">− حذف حصة</button><button id="addCol">＋ إضافة يوم</button><button id="delCol">− حذف يوم</button><button id="horizontal">جدول أفقي</button><button id="vertical">جدول عمودي</button></div><label class="field-label" for="accent">لون عناوين الأيام والحصص</label><input id="accent" class="accent-input" type="color" value="#6658e8"></div>
 </section>
-<section class="panel">
-  <div class="schedule-head"><input id="title" value="البرنامج الأسبوعي"><span id="status">تم الحفظ</span></div>
-  <div id="scheduleWrap"><table id="schedule"></table></div>
-</section>
-</main>
-<script src="app.js"></script>
-</body>
-</html>
+<section class="export-actions"><button id="pngBtn" class="export-btn">🖼️ حفظ كصورة PNG</button><button id="printBtn" class="export-btn secondary">📄 طباعة / PDF</button></section>
+<footer>Redro School Planner <span>•</span> جدولك محفوظ تلقائياً على هذا الجهاز</footer></main>
+<script src="app.js"></script></body></html>
