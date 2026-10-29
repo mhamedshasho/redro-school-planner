@@ -1,93 +1,62 @@
-const key="redro-school-planner-v3";
+(()=>{"use strict";
+const key="redro-school-planner-v4",oldKeys=["redro-school-planner-v3","redro-school-planner-v2"];
 const defaultDays=["السبت","الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"];
-const fallback={rows:6,cols:7,name:"",title:"البرنامج الأسبوعي",accent:"#ef4444",orientation:"horizontal",days:defaultDays.slice(),data:[]};
-let state=JSON.parse(localStorage.getItem(key)||"null")||JSON.parse(localStorage.getItem("redro-school-planner-v2")||"null")||fallback;
-state.rows=Math.max(1,Number(state.rows)||6); state.cols=Math.max(1,Number(state.cols)||7);
-state.days=Array.isArray(state.days)?state.days:defaultDays.slice();
-state.data=Array.isArray(state.data)?state.data:[];\nstate.cellColors=Array.isArray(state.cellColors)?state.cellColors:[];\nlet selectedCell=null;
+const subjects={science:{label:"علوم",en:"SCIENCE",art:"🧪",className:"science"},math:{label:"رياضيات",en:"MATH",art:"📐",className:"math"},arabic:{label:"اللغة العربية",en:"ARABIC",art:"أ",className:"arabic"},english:{label:"الإنجليزية",en:"ENGLISH",art:"Aa",className:"english"},french:{label:"الفرنسية",en:"FRANÇAIS",art:"🗼",className:"french"},history:{label:"التاريخ",en:"HISTORY",art:"🏛️",className:"history"},geography:{label:"الجغرافيا",en:"GEOGRAPHY",art:"🌍",className:"geography"},religion:{label:"التربية الدينية",en:"RELIGION",art:"☪",className:"religion"},computer:{label:"المعلوماتية",en:"COMPUTER",art:"💻",className:"computer"},sport:{label:"الرياضة",en:"SPORT",art:"⚽",className:"sport"},physics:{label:"الفيزياء",en:"PHYSICS",art:"⚛️",className:"physics"},chemistry:{label:"الكيمياء",en:"CHEMISTRY",art:"⚗️",className:"chemistry"}};
+const fallback={rows:6,cols:6,name:"",title:"البرنامج الأسبوعي",accent:"#6658e8",orientation:"horizontal",days:defaultDays.slice(0,6),data:[],cellColors:[],cellTemplates:[],cellImages:[]};
+function readState(){try{const saved=localStorage.getItem(key)||oldKeys.map(k=>localStorage.getItem(k)).find(Boolean);return saved?{...fallback,...JSON.parse(saved)}:{...fallback}}catch(e){return {...fallback}}}
+let state=readState(),selectedCell=null;
+state.rows=Math.max(1,Math.min(12,Number(state.rows)||6));state.cols=Math.max(1,Math.min(7,Number(state.cols)||6));
+for(const prop of ["days","data","cellColors","cellTemplates","cellImages"])if(!Array.isArray(state[prop]))state[prop]=[];
 const $=id=>document.getElementById(id);
-function save(){localStorage.setItem(key,JSON.stringify(state));const s=$("status");if(s){s.textContent="تم الحفظ";clearTimeout(window.saveTimer);window.saveTimer=setTimeout(()=>s.textContent="",900)}}
-function val(r,c){return state.data[r]?.[c]||""}
-function setVal(r,c,v){state.data[r]??=[];state.data[r][c]=v}\nfunction getCellColor(r,c){return state.cellColors[r]?.[c]||""}\nfunction setCellColor(r,c,color){state.cellColors[r]??=[];state.cellColors[r][c]=color}\nfunction selectCell(r,c){selectedCell={r,c};render()}
-function input(value,handler,cls=""){const i=document.createElement("input");i.value=value;i.className=cls;i.addEventListener("input",handler);return i}
+function ensureCell(r,c){for(const prop of ["data","cellColors","cellTemplates","cellImages"]){state[prop][r]??=[]}return true}
+function save(){try{localStorage.setItem(key,JSON.stringify(state));$("status").textContent="تم الحفظ على هذا الجهاز"}catch(e){$("status").textContent="الصورة كبيرة؛ جرّب صورة أصغر"}}
+function val(r,c){return state.data[r]?.[c]||""}function setVal(r,c,v){ensureCell(r,c);state.data[r][c]=v}
+function getAt(prop,r,c){return state[prop][r]?.[c]||null}function setAt(prop,r,c,v){ensureCell(r,c);state[prop][r][c]=v}
+function selected(){return selectedCell&&selectedCell.r<state.rows&&selectedCell.c<state.cols}
+function selectCell(r,c){selectedCell={r,c};render();$("selectedLabel").textContent="الخانة "+(r+1)+" · "+(state.days[c]||("اليوم "+(c+1)))}
+function makeInput(value,handler,placeholder=""){const i=document.createElement("input");i.value=value;i.placeholder=placeholder;i.addEventListener("input",handler);i.addEventListener("click",e=>e.stopPropagation());return i}
 function render(){
- document.documentElement.style.setProperty("--accent",state.accent);
- $("studentName").value=state.name;$("title").value=state.title;$("accent").value=state.accent;
+ document.documentElement.style.setProperty("--accent",state.accent||"#6658e8");$("studentName").value=state.name||"";$("title").value=state.title||"";$("accent").value=state.accent||"#6658e8";
  const t=$("schedule");t.innerHTML="";
- if(state.orientation==="horizontal"){
-  const tr=document.createElement("tr"),corner=document.createElement("th");corner.append(input("الحصة",()=>{}));tr.append(corner);
-  for(let c=0;c<state.cols;c++){const th=document.createElement("th");th.append(input(state.days[c]||("اليوم "+(c+1)),e=>{state.days[c]=e.target.value;save()}));tr.append(th)}t.append(tr);
-  for(let r=0;r<state.rows;r++){const row=document.createElement("tr"),th=document.createElement("th");th.append(input("الحصة "+(r+1),()=>{}));row.append(th);for(let c=0;c<state.cols;c++){const td=document.createElement("td");const color=getCellColor(r,c);if(color)td.style.backgroundColor=color;if(selectedCell?.r===r&&selectedCell?.c===c)td.classList.add("selected-cell");td.addEventListener("click",()=>selectCell(r,c));const inp=input(val(r,c),e=>{setVal(r,c,e.target.value);save()});inp.addEventListener("focus",()=>selectCell(r,c));td.append(inp);row.append(td)}t.append(row)}
- }else{
-  const tr=document.createElement("tr"),corner=document.createElement("th");corner.append(input("اليوم",()=>{}));tr.append(corner);
-  for(let r=0;r<state.rows;r++){const th=document.createElement("th");th.append(input("الحصة "+(r+1),()=>{}));tr.append(th)}t.append(tr);
-  for(let c=0;c<state.cols;c++){const row=document.createElement("tr"),th=document.createElement("th");th.append(input(state.days[c]||("اليوم "+(c+1)),e=>{state.days[c]=e.target.value;save()}));row.append(th);for(let r=0;r<state.rows;r++){const td=document.createElement("td");const color=getCellColor(r,c);if(color)td.style.backgroundColor=color;if(selectedCell?.r===r&&selectedCell?.c===c)td.classList.add("selected-cell");td.addEventListener("click",()=>selectCell(r,c));const inp=input(val(r,c),e=>{setVal(r,c,e.target.value);save()});inp.addEventListener("focus",()=>selectCell(r,c));td.append(inp);row.append(td)}t.append(row)}
+ const horizontal=state.orientation!=="vertical";
+ const head=document.createElement("tr"),corner=document.createElement("th");corner.textContent=horizontal?"الحصة":"اليوم";head.append(corner);
+ const headerCount=horizontal?state.cols:state.rows;
+ for(let c=0;c<headerCount;c++){const th=document.createElement("th");th.append(makeInput(horizontal?(state.days[c]||("اليوم "+(c+1))):("الحصة "+(c+1)),e=>{if(horizontal){state.days[c]=e.target.value}else{state.rowLabels??=[];state.rowLabels[c]=e.target.value}save()}));head.append(th)}t.append(head);
+ const rowCount=horizontal?state.rows:state.cols,colCount=horizontal?state.cols:state.rows;
+ for(let rr=0;rr<rowCount;rr++){const row=document.createElement("tr"),label=document.createElement("th");label.textContent=horizontal?("الحصة "+(rr+1)):(state.days[rr]||("اليوم "+(rr+1)));row.append(label);
+  for(let cc=0;cc<colCount;cc++){const r=horizontal?rr:cc,c=horizontal?cc:rr,td=document.createElement("td");ensureCell(r,c);if(selectedCell?.r===r&&selectedCell?.c===c)td.classList.add("selected-cell");
+   const color=getAt("cellColors",r,c);if(color)td.style.backgroundColor=color;
+   const tpl=getAt("cellTemplates",r,c);if(tpl&&subjects[tpl]){td.classList.add("has-template");const tile=document.createElement("div");tile.className="cell-template "+subjects[tpl].className;tile.innerHTML='<span class="cell-art"></span><strong></strong><small></small>';tile.querySelector(".cell-art").textContent=subjects[tpl].art;tile.querySelector("strong").textContent=subjects[tpl].label;tile.querySelector("small").textContent=subjects[tpl].en;td.append(tile)}
+   const photo=getAt("cellImages",r,c);if(photo?.src){const img=document.createElement("img");img.className="cell-photo";img.src=photo.src;img.alt="صورة الخانة";img.style.objectPosition=(photo.x??50)+"% "+(photo.y??50)+"%";img.style.transform="scale("+(photo.scale||1)+")";td.append(img);const shade=document.createElement("div");shade.className="cell-photo-shade";td.append(shade)}
+   const inp=makeInput(val(r,c),e=>{setVal(r,c,e.target.value);save()},"اكتب المادة");inp.setAttribute("aria-label","محتوى الخانة "+(r+1)+","+(c+1));inp.addEventListener("focus",()=>{if(selectedCell?.r!==r||selectedCell?.c!==c)selectCell(r,c)});td.append(inp);td.addEventListener("click",()=>selectCell(r,c));row.append(td)
+  }t.append(row)
  }
+ if(!selected()){selectedCell={r:0,c:0};$("selectedLabel").textContent="الخانة 1 · "+(state.days[0]||"اليوم 1")}
 }
-function resizeRows(n){if(n<1)return;state.rows=n;state.data.length=n;for(let r=0;r<n;r++)state.data[r]??=[];render();save()}
-function resizeCols(n){if(n<1)return;state.cols=n;for(const r of state.data)if(r)r.length=n;state.days.length=n;for(let c=0;c<n;c++)state.days[c]??=("اليوم "+(c+1));render();save()}
-function textFit(ctx,text,x,y,maxWidth,lineHeight,maxLines=2){
- const words=String(text||"").split(/\\s+/);let lines=[],line="";
- for(const w of words){const test=line?line+" "+w:w;if(ctx.measureText(test).width<=maxWidth)line=test;else{if(line)lines.push(line);line=w;if(lines.length===maxLines-1)break}}
- if(line&&lines.length<maxLines)lines.push(line);
- ctx.textAlign="center";ctx.textBaseline="middle";lines.slice(0,maxLines).forEach((l,i)=>ctx.fillText(l,x,y+(i-(lines.length-1)/2)*lineHeight));
-}
-function drawCell(ctx,x,y,w,h,text,header=false,bg=""){
- ctx.fillStyle=header?"#111827":(bg||"#ffffff");ctx.fillRect(x,y,w,h);
- ctx.strokeStyle="#cbd5e1";ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
- ctx.fillStyle=header?"#ffffff":"#111827";ctx.font=header?"700 18px Tahoma, Arial, sans-serif":"16px Tahoma, Arial, sans-serif";
- ctx.direction="rtl";textFit(ctx,text,x+w/2,y+h/2,w-18,20,2);
-}
-async function exportPNG(){
- const cols=state.orientation==="horizontal"?state.cols+1:state.rows+1;
- const rows=state.orientation==="horizontal"?state.rows+1:state.cols+1;
- const cw=150,ch=64,pad=24,titleH=86,nameH=30;
- const canvas=document.createElement("canvas");canvas.width=pad*2+cols*cw;canvas.height=pad*2+titleH+nameH+rows*ch;
- const ctx=canvas.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,canvas.width,canvas.height);
- ctx.fillStyle="#111827";ctx.textAlign="center";ctx.direction="rtl";ctx.font="800 28px Tahoma, Arial, sans-serif";ctx.fillText(state.title||"البرنامج الأسبوعي",canvas.width/2,pad+32);
- ctx.font="16px Tahoma, Arial, sans-serif";ctx.fillText(state.name?("الطالب: "+state.name):"",canvas.width/2,pad+62);
- const ox=pad,oy=pad+titleH;
- if(state.orientation==="horizontal"){
-  drawCell(ctx,ox,oy,cw,ch,"الحصة",true);
-  for(let c=0;c<state.cols;c++)drawCell(ctx,ox+(c+1)*cw,oy,cw,ch,state.days[c]||("اليوم "+(c+1)),true);
-  for(let r=0;r<state.rows;r++){drawCell(ctx,ox,oy+(r+1)*ch,cw,ch,"الحصة "+(r+1),true);for(let c=0;c<state.cols;c++)drawCell(ctx,ox+(c+1)*cw,oy+(r+1)*ch,cw,ch,val(r,c),false,getCellColor(r,c))}
- }else{
-  drawCell(ctx,ox,oy,cw,ch,"اليوم",true);
-  for(let r=0;r<state.rows;r++)drawCell(ctx,ox+(r+1)*cw,oy,cw,ch,"الحصة "+(r+1),true);
-  for(let c=0;c<state.cols;c++){drawCell(ctx,ox,oy+(c+1)*ch,cw,ch,state.days[c]||("اليوم "+(c+1)),true);for(let r=0;r<state.rows;r++)drawCell(ctx,ox+(r+1)*cw,oy+(c+1)*ch,cw,ch,val(r,c),false,getCellColor(r,c))}
- }
- const data=canvas.toDataURL("image/png");
- if(window.Android&&Android.savePng)Android.savePng(data,"redro-school-planner.png");else{const a=document.createElement("a");a.download="redro-school-planner.png";a.href=data;a.click()}
-}
-function buildPreviewTable(){
- const table=document.createElement("table"); table.className="preview-table";
- if(state.orientation==="horizontal"){
-  const tr=document.createElement("tr"),corner=document.createElement("th");corner.textContent="الحصة";tr.append(corner);
-  for(let c=0;c<state.cols;c++){const th=document.createElement("th");th.textContent=state.days[c]||("اليوم "+(c+1));tr.append(th)}table.append(tr);
-  for(let r=0;r<state.rows;r++){const row=document.createElement("tr"),th=document.createElement("th");th.textContent="الحصة "+(r+1);row.append(th);for(let c=0;c<state.cols;c++){const td=document.createElement("td");td.textContent=val(r,c);const color=getCellColor(r,c);if(color)td.style.backgroundColor=color;row.append(td)}table.append(row)}
- }else{
-  const tr=document.createElement("tr"),corner=document.createElement("th");corner.textContent="اليوم";tr.append(corner);
-  for(let r=0;r<state.rows;r++){const th=document.createElement("th");th.textContent="الحصة "+(r+1);tr.append(th)}table.append(tr);
-  for(let c=0;c<state.cols;c++){const row=document.createElement("tr"),th=document.createElement("th");th.textContent=state.days[c]||("اليوم "+(c+1));row.append(th);for(let r=0;r<state.rows;r++){const td=document.createElement("td");td.textContent=val(r,c);const color=getCellColor(r,c);if(color)td.style.backgroundColor=color;row.append(td)}table.append(row)}
- }
- return table;
-}
-function enterPreview(){
- const modal=document.createElement("div");modal.className="preview-modal";
- const box=document.createElement("div");box.className="preview-box";
- const bar=document.createElement("div");bar.className="preview-bar";
- const title=document.createElement("strong");title.textContent=state.title||"البرنامج الأسبوعي";
- const close=document.createElement("button");close.textContent="إغلاق Preview";close.onclick=()=>{if(window.Android&&Android.exitPreview)Android.exitPreview();else if(screen.orientation?.unlock)screen.orientation.unlock();modal.remove()};
- bar.append(title,close);box.append(bar);
- const meta=document.createElement("div");meta.className="preview-meta";meta.textContent=state.name?("الطالب: "+state.name):"";box.append(meta);
- const wrap=document.createElement("div");wrap.className="preview-table-wrap";wrap.append(buildPreviewTable());box.append(wrap);modal.append(box);document.body.append(modal);
- if(window.Android&&Android.enterPreview)Android.enterPreview();else if(screen.orientation?.lock)screen.orientation.lock("landscape").catch(()=>{});
-}
-$("previewBtn").onclick=enterPreview;
+function resizeRows(n){if(n<1||n>12)return;state.rows=n;for(const p of ["data","cellColors","cellTemplates","cellImages"])state[p].length=n;render();save()}
+function resizeCols(n){if(n<1||n>7)return;state.cols=n;state.days.length=n;for(let c=0;c<n;c++)state.days[c]??=defaultDays[c]||("اليوم "+(c+1));for(const p of ["data","cellColors","cellTemplates","cellImages"])for(const row of state[p])if(row)row.length=n;render();save()}
+function needCell(){if(selected())return true;alert("اضغط على الخانة التي تريد تعديلها أولاً.");return false}
+function setTab(name){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));document.querySelectorAll(".tab-panel").forEach(p=>p.classList.toggle("active",p.id==="tab-"+name))}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+$("templateGrid").addEventListener("click",e=>{const b=e.target.closest("[data-subject]");if(!b||!needCell())return;setAt("cellTemplates",selectedCell.r,selectedCell.c,b.dataset.subject);render();save()});
+$("swatches").addEventListener("click",e=>{const b=e.target.closest("[data-color]");if(!b||!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,b.dataset.color);render();save()});
+$("cellColor").addEventListener("input",e=>{if(!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,e.target.value);render();save()});
+$("clearCellStyle").onclick=()=>{if(!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,"");setAt("cellTemplates",selectedCell.r,selectedCell.c,"");render();save()};
+$("chooseImage").onclick=()=>{if(needCell())$("imageInput").click()};
+$("imageInput").addEventListener("change",e=>{const file=e.target.files?.[0];if(!file||!needCell())return;if(!file.type.startsWith("image/")){alert("اختر ملف صورة.");return}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=700,ratio=Math.min(1,max/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(img.width*ratio));canvas.height=Math.max(1,Math.round(img.height*ratio));canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);const src=canvas.toDataURL("image/jpeg",.78);setAt("cellImages",selectedCell.r,selectedCell.c,{src,x:50,y:50,scale:1});render();save();setTab("image")};img.onerror=()=>alert("تعذر قراءة الصورة.");img.src=reader.result};reader.readAsDataURL(file);e.target.value=""});
+function moveImage(dx,dy,scale){if(!needCell())return;const p=getAt("cellImages",selectedCell.r,selectedCell.c);if(!p?.src){alert("أضف صورة للخانة أولاً.");return}p.x=Math.max(0,Math.min(100,(p.x??50)+dx));p.y=Math.max(0,Math.min(100,(p.y??50)+dy));p.scale=Math.max(1,Math.min(2.5,(p.scale||1)+scale));setAt("cellImages",selectedCell.r,selectedCell.c,p);render();save()}
+$("moveLeft").onclick=()=>moveImage(-8,0,0);$("moveRight").onclick=()=>moveImage(8,0,0);$("moveUp").onclick=()=>moveImage(0,-8,0);$("moveDown").onclick=()=>moveImage(0,8,0);$("zoomIn").onclick=()=>moveImage(0,0,.15);$("zoomOut").onclick=()=>moveImage(0,0,-.15);
+$("removeImage").onclick=()=>{if(!needCell())return;setAt("cellImages",selectedCell.r,selectedCell.c,null);render();save()};
+$("studentName").addEventListener("input",e=>{state.name=e.target.value;save()});$("title").addEventListener("input",e=>{state.title=e.target.value;save()});
 $("addRow").onclick=()=>resizeRows(state.rows+1);$("delRow").onclick=()=>resizeRows(state.rows-1);$("addCol").onclick=()=>resizeCols(state.cols+1);$("delCol").onclick=()=>resizeCols(state.cols-1);
-$("studentName").oninput=e=>{state.name=e.target.value;save()};$("title").oninput=e=>{state.title=e.target.value;save()};const updateColor=()=>{if(!selectedCell){alert("اختر الخانة التي تريد تلوينها أولاً.");return}setCellColor(selectedCell.r,selectedCell.c,$("accent").value);render();save()};$("accent").oninput=updateColor;$("accent").onchange=updateColor;
-$("horizontal").onclick=()=>{state.orientation="horizontal";render();save()};$("vertical").onclick=()=>{state.orientation="vertical";render();save()};
-$("reset").onclick=()=>{if(confirm("إعادة البرنامج للوضع الافتراضي؟")){localStorage.removeItem(key);localStorage.removeItem("redro-school-planner-v2");location.reload()}};
-$("printBtn").onclick=()=>{if(window.Android&&Android.printPage)Android.printPage();else window.print()};
-$("pngBtn").onclick=()=>{try{exportPNG()}catch(e){alert("تعذر إنشاء PNG. حاول مرة أخرى.")}};
-render();
+$("horizontal").onclick=()=>{state.orientation="horizontal";render();save()};$("vertical").onclick=()=>{state.orientation="vertical";render();save()};$("accent").addEventListener("input",e=>{state.accent=e.target.value;render();save()});
+$("reset").onclick=()=>{if(confirm("إعادة الجدول للوضع الافتراضي؟ سيُمسح محتوى هذا الجدول المحفوظ على الجهاز.")){localStorage.removeItem(key);state={...fallback,days:defaultDays.slice(0,6),data:[],cellColors:[],cellTemplates:[],cellImages:[]};selectedCell={r:0,c:0};render();save()}};
+$("moreBtn").onclick=()=>{setTab("layout");$("editor").scrollIntoView({behavior:"smooth",block:"start"})};
+function drawCell(ctx,x,y,w,h,text,header=false,bg=""){ctx.fillStyle=header?state.accent:(bg||"#fff");ctx.fillRect(x,y,w,h);ctx.strokeStyle="#d9dbea";ctx.strokeRect(x+.5,y+.5,w-1,h-1);ctx.fillStyle=header?"#fff":"#27283b";ctx.font=header?"700 16px Tahoma,Arial,sans-serif":"14px Tahoma,Arial,sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction="rtl";ctx.fillText(String(text||"").slice(0,35),x+w/2,y+h/2,w-12)}
+function exportPNG(){const horizontal=state.orientation!=="vertical",rows=horizontal?state.rows+1:state.cols+1,cols=horizontal?state.cols+1:state.rows+1,cw=145,ch=72,pad=20,titleH=80;const canvas=document.createElement("canvas");canvas.width=pad*2+cols*cw;canvas.height=pad*2+titleH+rows*ch;const ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#25253a";ctx.font="800 25px Tahoma";ctx.textAlign="center";ctx.direction="rtl";ctx.fillText(state.title||"البرنامج الأسبوعي",canvas.width/2,pad+29);ctx.font="15px Tahoma";ctx.fillText(state.name?"الطالب: "+state.name:"",canvas.width/2,pad+56);const ox=pad,oy=pad+titleH;drawCell(ctx,ox,oy,cw,ch,horizontal?"الحصة":"اليوم",true);for(let c=0;c<(horizontal?state.cols:state.rows);c++)drawCell(ctx,ox+(c+1)*cw,oy,cw,ch,horizontal?(state.days[c]||("اليوم "+(c+1))):("الحصة "+(c+1)),true);for(let r=0;r<(horizontal?state.rows:state.cols);r++){drawCell(ctx,ox,oy+(r+1)*ch,cw,ch,horizontal?("الحصة "+(r+1)):(state.days[r]||("اليوم "+(r+1))),true);for(let c=0;c<(horizontal?state.cols:state.rows);c++){const rr=horizontal?r:c,cc=horizontal?c:r;let text=val(rr,cc);const tpl=getAt("cellTemplates",rr,cc);if(tpl&&subjects[tpl])text=subjects[tpl].art+" "+subjects[tpl].label+(text?"\n"+text:"");drawCell(ctx,ox+(c+1)*cw,oy+(r+1)*ch,cw,ch,text,false,getAt("cellColors",rr,cc));}}const a=document.createElement("a");a.download="redro-school-planner.png";a.href=canvas.toDataURL("image/png");a.click()}
+$("pngBtn").onclick=()=>{try{exportPNG()}catch(e){alert("تعذر حفظ الصورة. حاول مرة أخرى.")}};
+$("printBtn").onclick=()=>{if(window.Android?.printPage)window.Android.printPage();else window.print()};
+function preview(){const modal=document.createElement("div");modal.className="preview-modal";const box=document.createElement("div");box.className="preview-box";const bar=document.createElement("div");bar.className="preview-bar";const title=document.createElement("strong");title.textContent=state.title||"البرنامج الأسبوعي";const close=document.createElement("button");close.textContent="إغلاق المعاينة";close.onclick=()=>{if(window.Android?.exitPreview)window.Android.exitPreview();else if(screen.orientation?.unlock)screen.orientation.unlock();modal.remove()};bar.append(title,close);box.append(bar);const meta=document.createElement("div");meta.className="preview-meta";meta.textContent=state.name?"الطالب: "+state.name:"";box.append(meta);const wrap=document.createElement("div");wrap.className="preview-table-wrap";const table=document.createElement("table");table.className="preview-table";const horizontal=state.orientation!=="vertical";const head=document.createElement("tr");const first=document.createElement("th");first.textContent=horizontal?"الحصة":"اليوم";head.append(first);for(let c=0;c<(horizontal?state.cols:state.rows);c++){const th=document.createElement("th");th.textContent=horizontal?(state.days[c]||("اليوم "+(c+1))):("الحصة "+(c+1));head.append(th)}table.append(head);for(let r=0;r<(horizontal?state.rows:state.cols);r++){const row=document.createElement("tr"),th=document.createElement("th");th.textContent=horizontal?("الحصة "+(r+1)):(state.days[r]||("اليوم "+(r+1)));row.append(th);for(let c=0;c<(horizontal?state.cols:state.rows);c++){const rr=horizontal?r:c,cc=horizontal?c:r,td=document.createElement("td"),tpl=getAt("cellTemplates",rr,cc),p=getAt("cellImages",rr,cc);td.style.backgroundColor=getAt("cellColors",rr,cc)||"#fff";if(tpl&&subjects[tpl])td.textContent=subjects[tpl].art+" "+subjects[tpl].label+"\n"+val(rr,cc);else td.textContent=val(rr,cc);if(p?.src){const im=document.createElement("img");im.src=p.src;im.alt="";im.style.objectPosition=(p.x??50)+"% "+(p.y??50)+"%";td.append(document.createElement("br"),im)}row.append(td)}table.append(row)}wrap.append(table);box.append(wrap);modal.append(box);document.body.append(modal);if(window.Android?.enterPreview)window.Android.enterPreview();else if(screen.orientation?.lock)screen.orientation.lock("landscape").catch(()=>{})}
+$("previewBtn").onclick=preview;
+render();save();
+})();
