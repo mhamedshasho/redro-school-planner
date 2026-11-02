@@ -96,3 +96,26 @@ test("preview opens and closes without losing timetable data", async ({ page }) 
   await expect(page.locator(".preview-modal")).toHaveCount(0);
   await expect(page.locator("#schedule td").nth(0).locator("input")).toHaveValue("English");
 });
+
+test("PNG export includes an uploaded cell image", async ({ page }) => {
+  await page.locator("#schedule td").nth(0).click();
+  const pixelPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFElEQVQYV2P8z8Dwn4EIwDiqAQAADwAB/5n9WQAAAABJRU5ErkJggg==",
+    "base64"
+  );
+  await page.locator("#imageInput").setInputFiles({
+    name: "qa-pixel.png",
+    mimeType: "image/png",
+    buffer: pixelPng
+  });
+  await expect(page.locator("#schedule td").nth(0).locator(".cell-photo")).toBeVisible();
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator("#pngBtn").click();
+  const download = await downloadPromise;
+  const filePath = path.join(os.tmpdir(), download.suggestedFilename());
+  await download.saveAs(filePath);
+  const image = PNG.sync.read(fs.readFileSync(filePath));
+  const sample = image.data.slice((172 * image.width + 185) * 4, (172 * image.width + 185) * 4 + 3);
+  expect([...sample]).toEqual([255, 0, 255]);
+  fs.unlinkSync(filePath);
+});
