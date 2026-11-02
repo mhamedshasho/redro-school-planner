@@ -16,7 +16,7 @@ function selected(){return selectedCell&&selectedCell.r<state.rows&&selectedCell
 function selectCell(r,c){selectedCell={r,c};render();$("selectedLabel").textContent="الخانة "+(r+1)+" · "+(state.days[c]||("اليوم "+(c+1)))}
 function makeInput(value,handler,placeholder=""){const i=document.createElement("input");i.value=value;i.placeholder=placeholder;i.addEventListener("input",handler);i.addEventListener("click",e=>e.stopPropagation());return i}
 function render(){
- document.documentElement.style.setProperty("--accent",state.accent||"#6658e8");$("studentName").value=state.name||"";$("title").value=state.title||"";$("accent").value=state.accent||"#6658e8";
+ document.documentElement.style.setProperty("--table-accent",state.accent||"#6658e8");$("studentName").value=state.name||"";$("title").value=state.title||"";$("accent").value=state.accent||"#6658e8";
  const t=$("schedule");t.innerHTML="";
  const horizontal=state.orientation!=="vertical";
  const head=document.createElement("tr"),corner=document.createElement("th");corner.textContent=horizontal?"الحصة":"اليوم";head.append(corner);
