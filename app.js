@@ -90,7 +90,7 @@ async function exportPNG(){
 $("pngBtn").onclick=()=>{exportPNG().catch(()=>alert("تعذر حفظ الصورة. حاول مرة أخرى."))};
 function preparePrint(){
  const old=document.getElementById("redroPrintRoot");if(old)old.remove();
- const root=document.createElement("section");root.id="redroPrintRoot";
+ const root=document.createElement("section");root.id="redroPrintRoot";root.style.display="none";
  const title=document.createElement("h1");title.textContent=state.title||"البرنامج الأسبوعي";root.append(title);
  if(state.name){const name=document.createElement("p");name.textContent="الطالب: "+state.name;root.append(name)}
  const table=document.createElement("table");table.dir="rtl";const horizontal=state.orientation!=="vertical";
