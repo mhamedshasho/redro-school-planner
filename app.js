@@ -15,6 +15,7 @@ function getAt(prop,r,c){return state[prop][r]?.[c]||null}function setAt(prop,r,
 function selected(){return selectedCell&&selectedCell.r<state.rows&&selectedCell.c<state.cols}
 function selectCell(r,c){selectedCell={r,c};render();$("selectedLabel").textContent="الخانة "+(r+1)+" · "+(state.days[c]||("اليوم "+(c+1)))}
 function makeInput(value,handler,placeholder=""){const i=document.createElement("input");i.value=value;i.placeholder=placeholder;i.addEventListener("input",handler);i.addEventListener("click",e=>e.stopPropagation());return i}
+function syncImageMode(){const p=selected()?getAt("cellImages",selectedCell.r,selectedCell.c):null;const mode=p?.mode||"fit";$("imageFit")?.classList.toggle("active",mode==="fit");$("imageFill")?.classList.toggle("active",mode==="fill")}
 function render(){
  document.documentElement.style.setProperty("--table-accent",state.accent||"#6658e8");$("studentName").value=state.name||"";$("title").value=state.title||"";$("accent").value=state.accent||"#6658e8";
  const t=$("schedule");t.innerHTML="";
@@ -31,7 +32,7 @@ function render(){
    const inp=makeInput(val(r,c),e=>{setVal(r,c,e.target.value);save()},"اكتب المادة");inp.setAttribute("aria-label","محتوى الخانة "+(r+1)+","+(c+1));inp.addEventListener("focus",()=>{if(selectedCell?.r!==r||selectedCell?.c!==c)selectCell(r,c)});td.append(inp);td.addEventListener("click",()=>selectCell(r,c));row.append(td)
   }t.append(row)
  }
- if(!selected()){selectedCell={r:0,c:0};$("selectedLabel").textContent="الخانة 1 · "+(state.days[0]||"اليوم 1")}
+ if(!selected()){selectedCell={r:0,c:0};$("selectedLabel").textContent="الخانة 1 · "+(state.days[0]||"اليوم 1")}syncImageMode();
 }
 function resizeRows(n){if(n<1||n>12)return;state.rows=n;for(const p of ["data","cellColors","cellTemplates","cellImages"])state[p].length=n;render();save()}
 function resizeCols(n){if(n<1||n>7)return;state.cols=n;state.days.length=n;for(let c=0;c<n;c++)state.days[c]??=defaultDays[c]||("اليوم "+(c+1));for(const p of ["data","cellColors","cellTemplates","cellImages"])for(const row of state[p])if(row)row.length=n;render();save()}
