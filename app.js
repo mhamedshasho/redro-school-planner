@@ -88,7 +88,41 @@ async function exportPNG(){
  const a=document.createElement("a");a.download="redro-school-planner.png";a.href=canvas.toDataURL("image/png");a.click();
 }
 $("pngBtn").onclick=()=>{exportPNG().catch(()=>alert("تعذر حفظ الصورة. حاول مرة أخرى."))};
-$("printBtn").onclick=()=>{if(window.Android?.printPage)window.Android.printPage();else window.print()};
+function preparePrint(){
+ const old=document.getElementById("redroPrintRoot");if(old)old.remove();
+ const root=document.createElement("section");root.id="redroPrintRoot";
+ const title=document.createElement("h1");title.textContent=state.title||"البرنامج الأسبوعي";root.append(title);
+ if(state.name){const name=document.createElement("p");name.textContent="الطالب: "+state.name;root.append(name)}
+ const table=document.createElement("table");table.dir="rtl";const horizontal=state.orientation!=="vertical";
+ const rows=horizontal?state.rows:state.cols,cols=horizontal?state.cols:state.rows;
+ table.style.cssText="width:100%;border-collapse:collapse;table-layout:fixed;direction:rtl";
+ const makeCell=(tag,text,bg,color)=>{const el=document.createElement(tag);el.textContent=text;el.style.cssText="border:1px solid #777;padding:6px;text-align:center;vertical-align:middle;white-space:pre-wrap;overflow-wrap:anywhere;height:58px;background:"+bg+";color:"+color+"; -webkit-print-color-adjust:exact;print-color-adjust:exact";return el};
+ const head=document.createElement("tr");head.append(makeCell("th",horizontal?"الحصة":"اليوم",state.accent||"#6658e8","#fff"));
+ for(let c=0;c<cols;c++)head.append(makeCell("th",horizontal?(state.days[c]||("اليوم "+(c+1))):("الحصة "+(c+1)),state.accent||"#6658e8","#fff"));
+ table.append(head);
+ for(let rr=0;rr<rows;rr++){
+  const row=document.createElement("tr");row.append(makeCell("th",horizontal?("الحصة "+(rr+1)):(state.days[rr]||("اليوم "+(rr+1))),state.accent||"#6658e8","#fff"));
+  for(let cc=0;cc<cols;cc++){
+   const r=horizontal?rr:cc,c=horizontal?cc:rr,td=document.createElement("td");
+   const tpl=getAt("cellTemplates",r,c),photo=getAt("cellImages",r,c),bg=getAt("cellColors",r,c)||"#fff";
+   td.style.cssText="border:1px solid #777;padding:5px;text-align:center;vertical-align:middle;height:76px;background:"+bg+";color:#27283b;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact";
+   if(tpl&&subjects[tpl]){
+    const subject=subjects[tpl],tile=document.createElement("div");
+    tile.style.cssText="background:"+subject.bg+";padding:5px;margin-bottom:3px;color:#282940;-webkit-print-color-adjust:exact;print-color-adjust:exact";
+    const art=document.createElement("div");art.textContent=subject.art;art.style.fontSize="19px";
+    const label=document.createElement("strong");label.textContent=subject.label;label.style.display="block";
+    const en=document.createElement("small");en.textContent=subject.en;en.style.display="block";
+    tile.append(art,label,en);td.append(tile);
+   }
+   if(photo?.src){const img=document.createElement("img");img.src=photo.src;img.alt="";img.style.cssText="display:block;max-width:100%;max-height:52px;object-fit:contain;margin:2px auto";td.append(img)}
+   const content=document.createElement("div");content.textContent=val(r,c);content.style.cssText="font:12px Tahoma,Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere";td.append(content);row.append(td);
+  }
+  table.append(row);
+ }
+ root.append(table);document.body.append(root);return root;
+}
+$("printBtn").onclick=()=>{preparePrint();if(window.Android?.printPage)window.Android.printPage();else window.print()};
+window.addEventListener("afterprint",()=>document.getElementById("redroPrintRoot")?.remove());
 function preview(){const modal=document.createElement("div");modal.className="preview-modal";const box=document.createElement("div");box.className="preview-box";const bar=document.createElement("div");bar.className="preview-bar";const title=document.createElement("strong");title.textContent=state.title||"البرنامج الأسبوعي";const close=document.createElement("button");close.textContent="إغلاق المعاينة";close.onclick=()=>{if(window.Android?.exitPreview)window.Android.exitPreview();else if(screen.orientation?.unlock)screen.orientation.unlock();modal.remove()};bar.append(title,close);box.append(bar);const meta=document.createElement("div");meta.className="preview-meta";meta.textContent=state.name?"الطالب: "+state.name:"";box.append(meta);const wrap=document.createElement("div");wrap.className="preview-table-wrap";const table=document.createElement("table");table.className="preview-table";const horizontal=state.orientation!=="vertical";const head=document.createElement("tr");const first=document.createElement("th");first.textContent=horizontal?"الحصة":"اليوم";head.append(first);for(let c=0;c<(horizontal?state.cols:state.rows);c++){const th=document.createElement("th");th.textContent=horizontal?(state.days[c]||("اليوم "+(c+1))):("الحصة "+(c+1));head.append(th)}table.append(head);for(let r=0;r<(horizontal?state.rows:state.cols);r++){const row=document.createElement("tr"),th=document.createElement("th");th.textContent=horizontal?("الحصة "+(r+1)):(state.days[r]||("اليوم "+(r+1)));row.append(th);for(let c=0;c<(horizontal?state.cols:state.rows);c++){const rr=horizontal?r:c,cc=horizontal?c:r,td=document.createElement("td"),tpl=getAt("cellTemplates",rr,cc),p=getAt("cellImages",rr,cc);td.style.backgroundColor=getAt("cellColors",rr,cc)||"#fff";if(tpl&&subjects[tpl])td.textContent=subjects[tpl].art+" "+subjects[tpl].label+"\n"+val(rr,cc);else td.textContent=val(rr,cc);if(p?.src){const im=document.createElement("img");im.src=p.src;im.alt="";im.style.objectPosition=(p.x??50)+"% "+(p.y??50)+"%";td.append(document.createElement("br"),im)}row.append(td)}table.append(row)}wrap.append(table);box.append(wrap);modal.append(box);document.body.append(modal);if(window.Android?.enterPreview)window.Android.enterPreview();else if(screen.orientation?.lock)screen.orientation.lock("landscape").catch(()=>{})}
 $("previewBtn").onclick=preview;
 render();save();
