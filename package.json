@@ -1,0 +1,12 @@
+{
+  "name": "redro-school-planner-qa",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright test --reporter=list"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "pngjs": "^7.0.0"
+  }
+}
