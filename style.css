@@ -26,3 +26,5 @@ main{width:min(720px,100% - 24px);margin:0 auto}.welcome{margin:17px 0 12px;bord
  #redroPrintRoot td{height:20mm!important}
  #redroPrintRoot img{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
 }
+
+@media print{#schedule td.selected-cell,#schedule td.selected-cell:focus{outline:none!important;box-shadow:none!important}}
