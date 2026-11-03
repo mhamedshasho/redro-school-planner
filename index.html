@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5f6fb"><meta name="description" content="Redro School Planner — مخطط دراسي مصمم للهاتف">
-<title>Redro School Planner</title><link rel="stylesheet" href="style.css?v=quickdock-2">
+<title>Redro School Planner</title><link rel="stylesheet" href="style.css?v=quickdock-3">
 </head>
 <body>
-<header class="top"><a class="brand" href="#home"><span class="brand-mark">R</span><span><strong>Redro Planner</strong><small>مخططي المدرسي</small></span></a><div class="top-actions"><button id="previewBtn" class="icon-btn" aria-label="معاينة" title="معاينة">👁️ <span>معاينة</span></button><button id="moreBtn" class="icon-btn" aria-label="المواد السريعة">▦ <span>المواد</span></button></div></header>
+<header class="top"><a class="brand" href="#home"><span class="brand-mark">R</span><span><strong>Redro Planner</strong><small>مخططي المدرسي</small></span></a><div class="top-actions"><button id="previewBtn" class="icon-btn" aria-label="معاينة" title="معاينة">👁️ <span>معاينة</span></button><button id="moreBtn" class="icon-btn" aria-label="إدارة الجدول">⚙ <span>إدارة الجدول</span></button></div></header>
 <main id="home">
 <section class="welcome"><div class="welcome-copy"><span class="eyebrow">خطّطها بطريقتك</span><h1>أسبوعك، <span>بترتيبك.</span></h1><p>أنشئ جدولك، عدّل الخانات، ثم احفظه كصورة أو PDF.</p></div><div class="welcome-graphic" aria-hidden="true"><span>✎</span><i>✦</i><b>✓</b></div></section>
 <section class="quick-guide" aria-label="طريقة الاستخدام"><div><b>١</b><span><strong>اختر خانة</strong><small>اضغط على مربع في الجدول</small></span></div><div><b>٢</b><span><strong>عدّلها</strong><small>اكتب أو أضف قالباً أو لوناً أو صورة</small></span></div><div><b>٣</b><span><strong>احفظ جدولك</strong><small>اختر صورة PNG أو PDF</small></span></div></section>
@@ -43,8 +43,13 @@
 <section class="quick-dock" id="quickDock" aria-label="شريط التعديل السريع">
  <div class="dock-top"><span id="dockCell">اختر خانة من الجدول</span><div class="dock-nav"><button id="dockPrev" type="button" aria-label="الخانة السابقة">‹</button><button id="dockNext" type="button" aria-label="الخانة التالية">›</button></div></div>
  <input id="dockText" class="dock-text" type="text" placeholder="اكتب المادة أو عدّل النص مباشرة">
- <div class="dock-actions"><button id="dockSubjectsToggle" type="button" class="dock-action active">المواد</button><label class="dock-color" title="لون الخانة">لون<input id="dockColor" type="color" value="#dcecff"></label><button id="dockPhoto" type="button" class="dock-action">＋ صورة</button><button id="dockRemoveImage" type="button" class="dock-action">حذف الصورة</button><button id="dockFit" type="button" class="dock-action">FIT</button><button id="dockFill" type="button" class="dock-action">FILL</button><button id="dockClear" type="button" class="dock-action">مسح التنسيق</button></div>
+ <div class="dock-actions"><button id="dockLayoutToggle" type="button" class="dock-action">⚙ إدارة الجدول</button><button id="dockSubjectsToggle" type="button" class="dock-action active">المواد</button><label class="dock-color" title="لون الخانة">لون<input id="dockColor" type="color" value="#dcecff"></label><button id="dockPhoto" type="button" class="dock-action">＋ صورة</button><button id="dockRemoveImage" type="button" class="dock-action">حذف الصورة</button><button id="dockFit" type="button" class="dock-action">FIT</button><button id="dockFill" type="button" class="dock-action">FILL</button><button id="dockClear" type="button" class="dock-action">مسح التنسيق</button></div>
  <div id="dockSubjects" class="dock-subjects" aria-label="المواد السريعة"></div>
+ <div id="dockLayout" class="dock-layout" hidden>
+  <div class="dock-layout-group"><strong>الحصص</strong><button id="dockAddRow" type="button">＋ إضافة حصة</button><button id="dockDelRow" type="button">− حذف حصة</button></div>
+  <div class="dock-layout-group"><strong>الأيام</strong><button id="dockAddCol" type="button">＋ إضافة يوم</button><button id="dockDelCol" type="button">− حذف يوم</button></div>
+  <div class="dock-layout-group"><strong>الاتجاه</strong><button id="dockHorizontal" type="button">أفقي</button><button id="dockVertical" type="button">عمودي</button></div>
+ </div>
 </section>
 <footer>Redro School Planner <span>•</span> جدولك محفوظ تلقائياً على هذا الجهاز</footer></main>
-<script src="app.js?v=quickdock-2"></script></body></html>
+<script src="app.js?v=quickdock-3"></script></body></html>
