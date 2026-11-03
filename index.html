@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5f6fb"><meta name="description" content="Redro School Planner — مخطط دراسي مصمم للهاتف">
-<title>Redro School Planner</title><link rel="stylesheet" href="style.css?v=fitfill-4">
+<title>Redro School Planner</title><link rel="stylesheet" href="style.css?v=quickdock-1">
 </head>
 <body>
 <header class="top"><a class="brand" href="#home"><span class="brand-mark">R</span><span><strong>Redro Planner</strong><small>مخططي المدرسي</small></span></a><div class="top-actions"><button id="previewBtn" class="icon-btn" aria-label="معاينة" title="معاينة">👁️ <span>معاينة</span></button><button id="moreBtn" class="icon-btn" aria-label="الأدوات">☰ <span>الأدوات</span></button></div></header>
@@ -40,5 +40,11 @@
 <div class="tab-panel" id="tab-layout"><p class="helper">غيّر عدد الأيام والحصص أو اتجاه الجدول.</p><div class="layout-actions"><button id="addRow">＋ إضافة حصة</button><button id="delRow">− حذف حصة</button><button id="addCol">＋ إضافة يوم</button><button id="delCol">− حذف يوم</button><button id="horizontal">جدول أفقي</button><button id="vertical">جدول عمودي</button></div><label class="field-label" for="accent">لون عناوين الأيام والحصص</label><input id="accent" class="accent-input" type="color" value="#6658e8"></div>
 </section>
 <section class="export-actions"><button id="pngBtn" class="export-btn">🖼️ حفظ كصورة PNG</button><button id="printBtn" class="export-btn secondary">📄 طباعة / PDF</button></section>
+<section class="quick-dock" id="quickDock" aria-label="شريط التعديل السريع">
+ <div class="dock-top"><span id="dockCell">اختر خانة من الجدول</span><div class="dock-nav"><button id="dockPrev" type="button" aria-label="الخانة السابقة">‹</button><button id="dockNext" type="button" aria-label="الخانة التالية">›</button></div></div>
+ <input id="dockText" class="dock-text" type="text" placeholder="اكتب المادة أو عدّل النص مباشرة">
+ <div class="dock-actions"><button id="dockSubjectsToggle" type="button" class="dock-action active">المواد</button><label class="dock-color" title="لون الخانة">لون<input id="dockColor" type="color" value="#dcecff"></label><button id="dockPhoto" type="button" class="dock-action">＋ صورة</button><button id="dockFit" type="button" class="dock-action">FIT</button><button id="dockFill" type="button" class="dock-action">FILL</button><button id="dockClear" type="button" class="dock-action">مسح التنسيق</button></div>
+ <div id="dockSubjects" class="dock-subjects" aria-label="المواد السريعة"></div>
+</section>
 <footer>Redro School Planner <span>•</span> جدولك محفوظ تلقائياً على هذا الجهاز</footer></main>
-<script src="app.js?v=fitfill-4"></script></body></html>
+<script src="app.js?v=quickdock-1"></script></body></html>
