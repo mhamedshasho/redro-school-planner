@@ -49,6 +49,16 @@ $("dockPhoto").onclick=()=>{if(needCell())$("imageInput").click()};$("dockRemove
 $("dockFit").onclick=()=>setImageMode("fit");$("dockFill").onclick=()=>setImageMode("fill");
 $("dockClear").onclick=()=>{if(!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,"");setAt("cellTemplates",selectedCell.r,selectedCell.c,"");render();save();syncDock()};
 $("dockSubjectsToggle").onclick=()=>{dockSubjects.classList.toggle("collapsed");$("dockSubjectsToggle").classList.toggle("active",!dockSubjects.classList.contains("collapsed"))};
+const dockLayout=$("dockLayout");
+function toggleDockLayout(force){const open=typeof force==="boolean"?force:dockLayout.hidden;dockLayout.hidden=!open;$("dockLayoutToggle").dataset.open=String(open);if(open)dockLayout.scrollIntoView({block:"nearest",behavior:"smooth"})}
+$("dockLayoutToggle").onclick=()=>toggleDockLayout();
+$("moreBtn").onclick=()=>toggleDockLayout();
+$("dockAddRow").onclick=()=>resizeRows(state.rows+1);
+$("dockDelRow").onclick=()=>{if(state.rows<=1){alert("يجب أن يبقى يوم واحد على الأقل.");return}resizeRows(state.rows-1)};
+$("dockAddCol").onclick=()=>resizeCols(state.cols+1);
+$("dockDelCol").onclick=()=>{if(state.cols<=1){alert("يجب أن يبقى يوم واحد على الأقل.");return}resizeCols(state.cols-1)};
+$("dockHorizontal").onclick=()=>{state.orientation="horizontal";render();save()};
+$("dockVertical").onclick=()=>{state.orientation="vertical";render();save()};
 
 $("templateGrid").addEventListener("click",e=>{const b=e.target.closest("[data-subject]");if(!b||!needCell())return;setAt("cellTemplates",selectedCell.r,selectedCell.c,b.dataset.subject);render();save()});
 $("swatches").addEventListener("click",e=>{const b=e.target.closest("[data-color]");if(!b||!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,b.dataset.color);render();save()});
