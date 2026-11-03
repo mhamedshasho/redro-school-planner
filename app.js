@@ -13,7 +13,9 @@ function save(){try{localStorage.setItem(key,JSON.stringify(state));$("status").
 function val(r,c){return state.data[r]?.[c]||""}function setVal(r,c,v){ensureCell(r,c);state.data[r][c]=v}
 function getAt(prop,r,c){return state[prop][r]?.[c]||null}function setAt(prop,r,c,v){ensureCell(r,c);state[prop][r][c]=v}
 function selected(){return selectedCell&&selectedCell.r<state.rows&&selectedCell.c<state.cols}
-function selectCell(r,c){selectedCell={r,c};render();$("selectedLabel").textContent="الخانة "+(r+1)+" · "+(state.days[c]||("اليوم "+(c+1)))}
+function selectCell(r,c){selectedCell={r,c};render();$("selectedLabel").textContent="الخانة "+(r+1)+" · "+(state.days[c]||("اليوم "+(c+1)));syncDock()}
+function syncDock(){const label=$("dockCell"),input=$("dockText"),color=$("dockColor");if(!label||!input)return;const ok=selected();label.textContent=ok?"الخانة "+(selectedCell.r+1)+" · "+(state.days[selectedCell.c]||("اليوم "+(selectedCell.c+1))):"اختر خانة من الجدول";input.value=ok?val(selectedCell.r,selectedCell.c):"";const p=ok?getAt("cellImages",selectedCell.r,selectedCell.c):null;const mode=p?.mode||"fit";$("dockFit")?.classList.toggle("active",mode==="fit");$("dockFill")?.classList.toggle("active",mode==="fill");if(color){const current=ok?getAt("cellColors",selectedCell.r,selectedCell.c):null;color.value=current||"#dcecff"}}
+function moveSelected(step){if(!selected())return;const index=selectedCell.r*state.cols+selectedCell.c+step,total=state.rows*state.cols,next=(index+total)%total;selectCell(Math.floor(next/state.cols),next%state.cols);const cell=$("schedule").querySelector(".selected-cell");cell?.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"})}
 function makeInput(value,handler,placeholder=""){const i=document.createElement("input");i.value=value;i.placeholder=placeholder;i.addEventListener("input",handler);i.addEventListener("click",e=>e.stopPropagation());return i}
 function syncImageMode(){const p=selected()?getAt("cellImages",selectedCell.r,selectedCell.c):null;const mode=p?.mode||"fit";$("imageFit")?.classList.toggle("active",mode==="fit");$("imageFill")?.classList.toggle("active",mode==="fill");$("imageFit")?.setAttribute("aria-pressed",String(mode==="fit"));$("imageFill")?.setAttribute("aria-pressed",String(mode==="fill"))}
 function render(){
@@ -32,13 +34,22 @@ function render(){
    const inp=makeInput(val(r,c),e=>{setVal(r,c,e.target.value);save()},"اكتب المادة");inp.setAttribute("aria-label","محتوى الخانة "+(r+1)+","+(c+1));inp.addEventListener("focus",()=>{if(selectedCell?.r!==r||selectedCell?.c!==c)selectCell(r,c)});td.append(inp);td.addEventListener("click",()=>selectCell(r,c));row.append(td)
   }t.append(row)
  }
- if(!selected()){selectedCell={r:0,c:0};$("selectedLabel").textContent="الخانة 1 · "+(state.days[0]||"اليوم 1")}syncImageMode();
+ if(!selected()){selectedCell={r:0,c:0};$("selectedLabel").textContent="الخانة 1 · "+(state.days[0]||"اليوم 1")}syncImageMode();syncDock();
 }
 function resizeRows(n){if(n<1||n>12)return;state.rows=n;for(const p of ["data","cellColors","cellTemplates","cellImages"])state[p].length=n;render();save()}
 function resizeCols(n){if(n<1||n>7)return;state.cols=n;state.days.length=n;for(let c=0;c<n;c++)state.days[c]??=defaultDays[c]||("اليوم "+(c+1));for(const p of ["data","cellColors","cellTemplates","cellImages"])for(const row of state[p])if(row)row.length=n;render();save()}
 function needCell(){if(selected())return true;alert("اضغط على الخانة التي تريد تعديلها أولاً.");return false}
 function setTab(name){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));document.querySelectorAll(".tab-panel").forEach(p=>p.classList.toggle("active",p.id==="tab-"+name))}
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+const dockSubjects=$("dockSubjects");document.querySelectorAll("#templateGrid [data-subject]").forEach(source=>{const b=document.createElement("button");b.type="button";b.className="dock-subject";b.dataset.subject=source.dataset.subject;b.textContent=source.querySelector("strong")?.textContent||source.dataset.subject;b.addEventListener("click",()=>{if(!needCell())return;setAt("cellTemplates",selectedCell.r,selectedCell.c,b.dataset.subject);const subject=subjects[b.dataset.subject];if(subject)setVal(selectedCell.r,selectedCell.c,subject.label);render();save();syncDock()});dockSubjects.append(b)});
+$("dockText").addEventListener("input",e=>{if(!needCell())return;setVal(selectedCell.r,selectedCell.c,e.target.value);const td=$("schedule").querySelector(".selected-cell input");if(td&&td!==e.target)td.value=e.target.value;save()});
+$("dockPrev").onclick=()=>moveSelected(-1);$("dockNext").onclick=()=>moveSelected(1);
+$("dockColor").addEventListener("input",e=>{if(!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,e.target.value);render();save();syncDock()});
+$("dockPhoto").onclick=()=>{if(needCell())$("imageInput").click()};
+$("dockFit").onclick=()=>setImageMode("fit");$("dockFill").onclick=()=>setImageMode("fill");
+$("dockClear").onclick=()=>{if(!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,"");setAt("cellTemplates",selectedCell.r,selectedCell.c,"");render();save();syncDock()};
+$("dockSubjectsToggle").onclick=()=>{dockSubjects.classList.toggle("collapsed");$("dockSubjectsToggle").classList.toggle("active",!dockSubjects.classList.contains("collapsed"))};
+
 $("templateGrid").addEventListener("click",e=>{const b=e.target.closest("[data-subject]");if(!b||!needCell())return;setAt("cellTemplates",selectedCell.r,selectedCell.c,b.dataset.subject);render();save()});
 $("swatches").addEventListener("click",e=>{const b=e.target.closest("[data-color]");if(!b||!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,b.dataset.color);render();save()});
 $("cellColor").addEventListener("input",e=>{if(!needCell())return;setAt("cellColors",selectedCell.r,selectedCell.c,e.target.value);render();save()});
