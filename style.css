@@ -66,3 +66,19 @@ body{padding-bottom:calc(205px + env(safe-area-inset-bottom,0px))}
 .dock-subjects{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}.dock-subjects.collapsed{display:none}.dock-subject{flex:0 0 auto;min-height:31px;padding:0 11px;border:1px solid #e5e5ef;border-radius:9px;background:#f6f6fb;color:#45465c;font-size:10px;font-weight:800}
 @media(min-width:700px){.quick-dock{left:50%;right:auto;transform:translateX(-50%);width:min(720px,calc(100% - 32px));border:1px solid #dedfeb;border-bottom:0;border-radius:17px 17px 0 0}.quick-dock .dock-subject{min-height:34px}}
 @media(max-width:390px){body{padding-bottom:198px}.quick-dock{padding-inline:8px;gap:6px}.dock-action,.dock-color{padding-inline:9px}.dock-text{height:36px}}
+
+.editor{display:none!important}
+body{padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))}
+.quick-dock{gap:9px;padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid #e5e6ef;box-shadow:0 -10px 35px #20213b20}
+.dock-top{min-height:30px}.dock-top>span{background:#f1efff;color:#4d40c6;padding:5px 10px;border-radius:9px;font-size:11px}
+.dock-nav button{width:36px;height:32px;background:#f7f7fb;border-color:#e9e9f1;font-weight:800}
+.dock-text{height:43px;border:1.5px solid #dedff0;border-radius:12px;background:#f8f8fc;font-size:14px;padding-inline:13px}
+.dock-actions{gap:7px;padding:1px 0 3px}
+.dock-action,.dock-color{min-height:38px;border-radius:11px;padding:0 12px;background:#f7f7fb;border-color:#e9e9f1;color:#45465d;white-space:nowrap}
+.dock-action.active{background:#5144ce;color:#fff;border-color:#5144ce}
+.dock-color{background:#fff;gap:7px}.dock-color input{width:24px;height:24px;border-radius:7px;cursor:pointer}
+.dock-subjects{gap:8px;padding:2px 1px 5px}
+.dock-subject{min-height:39px;padding:0 13px;border-radius:12px;background:#f2f1ff;border-color:#e2dfff;color:#4338a9;font-size:11px;font-weight:850;white-space:nowrap}
+.dock-subject:active{transform:scale(.96)}
+.dock-subjects.collapsed{display:none}
+@media(max-width:390px){body{padding-bottom:188px}.quick-dock{padding-inline:9px}.dock-action,.dock-color{padding-inline:10px}.dock-text{height:41px}}
