@@ -93,3 +93,4 @@ body{padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))}
 .dock-layout-group button:active{background:#efedff;border-color:#c8c0ff}
 .dock-action[data-open="true"]{background:#5144ce;color:white;border-color:#5144ce}
 @media(max-width:390px){.dock-layout{gap:5px;padding:7px}.dock-layout-group button{font-size:9px;min-height:34px}}
+.brand-mark{display:block;object-fit:contain;background:#fff;padding:1px;overflow:hidden;flex:0 0 auto}
