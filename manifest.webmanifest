@@ -1,28 +1,32 @@
 {
-  "id": "/redro-school-planner/",
+  "id": "https://mhamedshasho.github.io/redro-school-planner/",
   "name": "Redro School Planner",
   "short_name": "School Planner",
   "description": "مخطط دراسي من Redro",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "https://mhamedshasho.github.io/redro-school-planner/",
+  "scope": "https://mhamedshasho.github.io/redro-school-planner/",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#ffffff",
   "theme_color": "#e3262d",
   "icons": [
     {
-      "src": "./assets/app-icon-192.png",
+      "src": "https://mhamedshasho.github.io/redro-school-planner/assets/app-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./assets/app-icon-512.png",
+      "src": "https://mhamedshasho.github.io/redro-school-planner/assets/app-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./assets/app-icon-maskable-512.png",
+      "src": "https://mhamedshasho.github.io/redro-school-planner/assets/app-icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
