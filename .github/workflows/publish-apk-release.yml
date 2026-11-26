@@ -45,5 +45,5 @@ jobs:
           set -euo pipefail
           tag="android-preview-$GITHUB_RUN_ID"
           gh release create "$tag" release-assets/*.apk \
-            --title "Android APK Preview $GITHUB_RUN_NUMBER" \
+            --title "Redro Android APK Release $GITHUB_RUN_NUMBER" \
             --notes "Published Android APK test build. This is a debug/unsigned build, not a signed production release. Updating may require uninstalling the previous version first."
