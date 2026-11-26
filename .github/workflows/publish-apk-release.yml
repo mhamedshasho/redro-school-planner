@@ -1,0 +1,49 @@
+name: Publish Android APK Release
+
+on:
+  push:
+    paths:
+      - ".github/workflows/publish-apk-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download latest successful APK artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARTIFACT_NAMES: '["redro-school-planner-android-apk"]'
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          echo "$ARTIFACT_NAMES" | jq -r '.[]' | while read -r artifact_name; do
+            artifact="$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" --jq "[.artifacts[] | select(.name == \"$artifact_name\" and .expired == false)] | sort_by(.created_at) | last")"
+            if [ -z "$artifact" ] || [ "$artifact" = "null" ]; then
+              echo "Missing unexpired artifact: $artifact_name"
+              exit 1
+            fi
+            run_id="$(echo "$artifact" | jq -r '.workflow_run.id')"
+            mkdir -p "tmp/$artifact_name"
+            gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name "$artifact_name" --dir "tmp/$artifact_name"
+            apk="$(find "tmp/$artifact_name" -type f -name '*.apk' -print -quit)"
+            if [ -z "$apk" ]; then
+              echo "No APK found in $artifact_name"
+              exit 1
+            fi
+            cp "$apk" "release-assets/$artifact_name.apk"
+          done
+      - name: Publish preview release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="android-preview-$GITHUB_RUN_ID"
+          gh release create "$tag" release-assets/*.apk \
+            --title "Android APK Preview $GITHUB_RUN_NUMBER" \
+            --notes "Automated preview build. This APK is an unsigned/debug build for testing, not a stable production release. Android updates may require uninstalling the previous build first." \
+            --prerelease
