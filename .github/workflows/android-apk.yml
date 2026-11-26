@@ -1,0 +1,60 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "**"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install packaging tools
+        run: |
+          npm init -y
+          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 sharp
+      - name: Prepare app web files
+        run: |
+          mkdir -p www resources
+          rsync -a --exclude='.git' --exclude='node_modules' --exclude='android' --exclude='www' --exclude='resources' ./ www/
+          node --input-type=module -e '
+            import sharp from "sharp";
+            import { existsSync } from "node:fs";
+            const source = "assets/app-icon-512.png";
+            if (!existsSync(source)) throw new Error("Required app icon is missing: " + source);
+            await sharp(source).resize(1024,1024,{fit:"contain",background:{r:17,g:19,b:24,alpha:1}}).png().toFile("resources/icon.png");
+          '
+      - name: Initialize Capacitor Android
+        run: |
+          npx cap init "Redro School Planner" "com.redro.schoolplanner" --web-dir=www
+          npx cap add android
+          npx cap sync android
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: redro-school-planner-android-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
