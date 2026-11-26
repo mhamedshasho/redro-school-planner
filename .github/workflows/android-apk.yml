@@ -44,7 +44,8 @@ jobs:
       - name: Initialize Capacitor Android
         run: |
           npx cap init "Redro School Planner" "com.redro.schoolplanner" --web-dir=www
-          if [ ! -d android ]; then npx cap add android; fi
+          rm -rf android
+          npx cap add android
           npx cap sync android
           npx capacitor-assets generate --android
       - name: Build APK
