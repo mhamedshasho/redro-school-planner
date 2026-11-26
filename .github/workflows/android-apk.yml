@@ -29,7 +29,7 @@ jobs:
       - name: Install packaging tools
         run: |
           npm init -y
-          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 sharp
+          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/assets sharp
       - name: Prepare app web files
         run: |
           mkdir -p www resources
@@ -46,6 +46,7 @@ jobs:
           npx cap init "Redro School Planner" "com.redro.schoolplanner" --web-dir=www
           npx cap add android
           npx cap sync android
+          npx capacitor-assets generate --android
       - name: Build APK
         working-directory: android
         run: |
