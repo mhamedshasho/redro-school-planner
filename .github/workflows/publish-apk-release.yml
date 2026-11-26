@@ -46,5 +46,4 @@ jobs:
           tag="android-preview-$GITHUB_RUN_ID"
           gh release create "$tag" release-assets/*.apk \
             --title "Android APK Preview $GITHUB_RUN_NUMBER" \
-            --notes "Automated preview build. This APK is an unsigned/debug build for testing, not a stable production release. Android updates may require uninstalling the previous build first." \
-            --prerelease
+            --notes "Published Android APK test build. This is a debug/unsigned build, not a signed production release. Updating may require uninstalling the previous version first."
